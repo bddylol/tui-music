@@ -1,33 +1,61 @@
-<div class="flex h-full w-full flex-row items-center justify-between gap-8 px-4">
-	<div class="flex flex-row space-x-2 text-xl">
-		<div class="cursor-pointer p-2 select-none"></div>
-		<div class="cursor-pointer p-2 select-none"></div>
-		<div class="cursor-pointer p-2 select-none"></div>
+<script>
+	import Badge from './Badge.svelte';
+	import { musicKitInstance, nowPlaying, playbackState } from '$lib/stores/musickit'; // Import new store
+
+	// Listen for playback state changes
+	$musicKitInstance?.addEventListener('playbackStateDidChange', (event) => {
+		console.log('Playback state changed:', event);
+		const item = $musicKitInstance.player.nowPlayingItem;
+		nowPlaying.set(item);
+		playbackState.set($musicKitInstance.player.playbackState); // Update playbackState store
+	});
+
+	// Listen for now playing item changes (crucial for track info updates)
+	$musicKitInstance?.addEventListener('nowPlayingItemDidChange', (event) => {
+		console.log('Now playing item changed:', event);
+		const item = $musicKitInstance.player.nowPlayingItem;
+		nowPlaying.set(item); // Ensure this updates the store whenever the item changes
+	});
+
+	function play() {
+		$musicKitInstance?.player.play();
+	}
+	function pause() {
+		$musicKitInstance?.player.pause();
+	}
+	function next() {
+		$musicKitInstance?.player.skipToNextItem();
+	}
+	function previous() {
+		$musicKitInstance?.player.skipToPreviousItem();
+	}
+</script>
+
+<div class="flex flex-row justify-between px-1.5 pb-2.5 text-lg select-none">
+	<div class="flex flex-row items-center gap-2">
+		<Badge is-="badge" variant-="blue">
+			{$playbackState !== null ? ($playbackState === 1 ? 'PAUSED' : 'PLAYING') : '⏸️'}
+		</Badge>
+		<Badge is-="badge" variant-="background1">
+			 {$nowPlaying?.artistName?.toUpperCase() || 'UNKNOWN ARTIST'}</Badge
+		>
+		<Badge is-="badge" variant-="background0">
+			 {$nowPlaying?.title || 'Unknown Title'} from {$nowPlaying?.albumName ||
+				'Unknown Album'}</Badge
+		>
 	</div>
-
-	<div class="relative flex w-1/3 flex-row rounded-t-xl bg-[var(--background1)] p-1">
-		<img
-			class="mb-1 size-10 rounded-lg"
-			alt="album cover"
-			src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/51/dc/53/51dc53da-2faf-3cdb-9c42-bca9729a803a/13UMDIM01260.rgb.jpg/512x512sr.jpg"
-		/>
-		<div class="mb-1 flex w-full flex-col items-center justify-center">
-			<span>Make Me Wanna</span>
-			<span class="text-xs">It Goes Like This - Thomas Rhett</span>
-		</div>
-
-		<div class="absolute bottom-0 left-0 h-1 w-full bg-[var(--surface1)]">
-			<div class="h-full w-1/5 rounded-full bg-[var(--overlay2)]"></div>
-		</div>
+	<!-- Playback controls -->
+	<div class="mx-2 flex flex-row items-center gap-1">
+		<Badge is-="badge" variant-="background1" on:click={previous} style="cursor:pointer;"></Badge>
+		{#if $playbackState === 1}
+			<Badge is-="badge" variant-="background1" on:click={play} style="cursor:pointer;"></Badge>
+		{:else}
+			<Badge is-="badge" variant-="background1" on:click={pause} style="cursor:pointer;"></Badge>
+		{/if}
+		<Badge is-="badge" variant-="background1" on:click={next} style="cursor:pointer;"></Badge>
 	</div>
-
-	<div class="flex flex-row items-center space-x-2">
-		<div class="flex flex-row items-center space-x-1">
-			<div class="mb-0.5 p-2 select-none"></div>
-			<div class="h-2 w-24 rounded-full bg-[var(--surface0)]">
-				<div class="h-full w-1/2 rounded-full bg-[var(--overlay2)]"></div>
-			</div>
-		</div>
-		<div class="cursor-pointer p-2 text-xl select-none">󰭷</div>
+	<div class="flex flex-row items-center">
+		<Badge is-="badge" variant-="background1"> 45</Badge>
+		<Badge is-="badge" variant-="blue">null / 2:20</Badge>
 	</div>
 </div>

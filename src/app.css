@@ -19,3 +19,7 @@
 		--font-family: 'JetBrains Mono', Menlo, Monaco, monospace, 'Symbols Nerd Font';
 	}
 }
+
+[data-sidebar-section] > a {
+	@apply p-1.5 hover:bg-[var(--background1)];
+}
