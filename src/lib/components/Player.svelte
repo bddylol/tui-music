@@ -41,8 +41,8 @@
 	$: console.log('Current volume:', $volume);
 </script>
 
-<div class="flex flex-row justify-between px-1.5 pb-2.5 text-lg select-none">
-	<div class="flex flex-row items-center gap-2">
+<div class="flex flex-row justify-between bg-[var(--background0)] text-lg select-none">
+	<div class="flex flex-row items-center">
 		<Badge is-="badge" variant-="blue">
 			{$playbackState !== null ? ($playbackState === 1 ? 'PAUSED' : 'PLAYING') : '⏸️'}
 		</Badge>
