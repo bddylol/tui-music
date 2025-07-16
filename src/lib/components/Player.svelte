@@ -1,6 +1,7 @@
 <script>
 	import Badge from './Badge.svelte';
-	import { musicKitInstance, nowPlaying, playbackState } from '$lib/stores/musickit'; // Import new store
+	import { musicKitInstance, nowPlaying, playbackState, volume } from '$lib/stores/musickit'; // Import new store
+	import Popover from './Popover.svelte';
 
 	// Listen for playback state changes
 	$musicKitInstance?.addEventListener('playbackStateDidChange', (event) => {
@@ -8,6 +9,8 @@
 		const item = $musicKitInstance.player.nowPlayingItem;
 		nowPlaying.set(item);
 		playbackState.set($musicKitInstance.player.playbackState); // Update playbackState store
+		// Ensure volume is set after playback state changes
+		$musicKitInstance.player.volume = $volume;
 	});
 
 	// Listen for now playing item changes (crucial for track info updates)
@@ -29,6 +32,13 @@
 	function previous() {
 		$musicKitInstance?.player.skipToPreviousItem();
 	}
+
+	// Sync volume with MusicKit player
+	$: if ($musicKitInstance && typeof $volume === 'number') {
+		console.log('Setting player volume:', $volume);
+		$musicKitInstance.player.volume = $volume;
+	}
+	$: console.log('Current volume:', $volume);
 </script>
 
 <div class="flex flex-row justify-between px-1.5 pb-2.5 text-lg select-none">
@@ -55,7 +65,27 @@
 		<Badge is-="badge" variant-="background1" on:click={next} style="cursor:pointer;"></Badge>
 	</div>
 	<div class="flex flex-row items-center">
-		<Badge is-="badge" variant-="background1"> 45</Badge>
+		<Popover position-="top center" is-="popover">
+			<summary class="cursor-pointer"
+				><Badge is-="badge" variant-="background1"> {Math.round($volume * 100)}</Badge></summary
+			>
+			<div class="flex flex-row bg-[var(--background1)] p-1">
+				<button
+					on:click={() => volume.update((v) => Math.max(0, v - 0.05))}
+					style="all: unset; cursor: pointer; display: inline-block;"
+					aria-label="Decrease volume"
+				>
+					<Badge is-="badge" variant-="background0">-</Badge>
+				</button>
+				<button
+					on:click={() => volume.update((v) => Math.min(1, v + 0.05))}
+					style="all: unset; cursor: pointer; display: inline-block;"
+					aria-label="Increase volume"
+				>
+					<Badge is-="badge" variant-="background0">+</Badge>
+				</button>
+			</div>
+		</Popover>
 		<Badge is-="badge" variant-="blue">null / 2:20</Badge>
 	</div>
 </div>

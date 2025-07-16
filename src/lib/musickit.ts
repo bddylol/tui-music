@@ -19,6 +19,14 @@ export async function initializeMusicKit() {
 				musicKitInstance.set(instance);
 				isMusicKitAuthenticated.set(instance.isAuthorized);
 
+				// Set the player volume to the stored value
+				let storedVolume = 0.5;
+				if (typeof localStorage !== 'undefined') {
+					const saved = localStorage.getItem('musicKitVolume');
+					if (saved !== null) storedVolume = parseFloat(saved);
+				}
+				instance.player.volume = storedVolume;
+
 				if (!instance.isAuthorized) {
 					instance
 						.authorize()
